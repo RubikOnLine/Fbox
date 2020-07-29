@@ -10,39 +10,45 @@ from .foodboxes import foodboxes
 @api_view(http_method_names=['GET'])
 def foodboxes_list(request):
     result = []
+    """ Допольнителный словарь с полями для выборок """
+    field_dict = {"price": None,
+                  "weight_grams": None}
 
-    if request.query_params.get("price"):
-        for fbox in foodboxes:
-            if int(fbox["price"]) >= int(request.query_params.get("price")):
-                result.append(fbox)
+    """ Распаковка словаря request.query_params содержащий поля и значение из запроса. К примеру, запрос ?price=2000 - ['price': 2000] """
+    dict_a = list(request.query_params.keys())
 
-    if request.query_params.get("weight_grams"):
+    if dict_a:
         for fbox in foodboxes:
-            if int(fbox["weight_grams"]) >= int(request.query_params.get("weight_grams")):
+            if fbox[dict_a[0]] >= int(request.query_params.get(dict_a[0])):
                 result.append(fbox)
 
     else:
-        for fbox in foodboxes:
-            result.append(
-                {"title": fbox["name"],
-                 "description": fbox["about"],
-                 "price": fbox["price"],
-                 "weight": fbox["weight_grams"]
-                 })
+        result = foodboxes
 
-    return Response(result)
+    """ Вывод результата в строгом формате """
+
+    response = []
+    # print(result)
+    for res in result:
+        print(res)
+        response.append(
+            {"title": res["name"],
+             "description": res["about"],
+             "price": res["price"],
+             "weight": res["weight_grams"]
+             })
+
+    return Response(response)
 
 
 @api_view(http_method_names=['GET'])
 def foodbox(request, pk):
+    if not pk:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if not pk:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        for fbox in foodboxes:
-            if fbox['inner_id'] == pk:
-                return Response(fbox)
-
+    for fbox in foodboxes:
+        if fbox['inner_id'] == pk:
+            return Response(fbox)
 
 
 @api_view(http_method_names=['GET'])
@@ -65,7 +71,6 @@ def recipients_list(request):
 
 @api_view(http_method_names=['GET'])
 def recipient(request, pk):
-
     if not pk:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
